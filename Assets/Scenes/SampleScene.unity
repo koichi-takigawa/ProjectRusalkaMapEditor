@@ -468,7 +468,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b56a5cd0f63159d409b70370b25a97c5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Cursor: {fileID: 5034584}
+  CursorObject: {fileID: 5034584}
   CursorPositionText: {fileID: 0}
 --- !u!1 &809304864
 GameObject:
@@ -609,7 +609,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_EyeHeight: 1
   Pitch: 30
-  mLastHitPoint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

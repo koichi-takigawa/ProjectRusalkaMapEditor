@@ -11,7 +11,7 @@ public class FieldInputController : MonoBehaviour
     public static FieldInputController Instance { get; private set; } = default!;
 
     [Tooltip("カーソルオブジェクト")]
-    [SerializeField] GameObject Cursor = default!;
+    [SerializeField] GameObject CursorObject = default!;
 
     [Tooltip("カーソル位置表示用テキスト")]
     [SerializeField] TextMeshProUGUI? CursorPositionText;
@@ -70,7 +70,7 @@ public class FieldInputController : MonoBehaviour
         Instance = this;
 
         // 各種エラー出力
-        Debug.Assert(Cursor != null, this.GetType().Name + ".Cursor not found.");
+        Debug.Assert(CursorObject != null, this.GetType().Name + ".Cursor not found.");
         if (CursorPositionText == null) Debug.LogWarning(this.GetType().Name + ".CursorPositionText is null");
     }
 
@@ -121,9 +121,9 @@ public class FieldInputController : MonoBehaviour
             // カーソルを無効化する
             mCursorPos = null;
 
-            if (Cursor.activeSelf)
+            if (CursorObject.activeSelf)
             {
-                Cursor.SetActive(false);
+                CursorObject.SetActive(false);
             }
 
             if (CursorPositionText != null)
@@ -138,11 +138,11 @@ public class FieldInputController : MonoBehaviour
 
             hex.ToPointFloat(out float x, out float y);
 
-            Cursor.transform.position = new Vector3(x * Field.SIZE, hex.H * Field.THICKNESS, y * Field.SIZE);
+            CursorObject.transform.position = new Vector3(x * Field.SIZE, hex.H * Field.THICKNESS, y * Field.SIZE);
 
-            if (Cursor.activeSelf == false)
+            if (CursorObject.activeSelf == false)
             {
-                Cursor.SetActive(true);
+                CursorObject.SetActive(true);
             }
 
             if (CursorPositionText != null)
