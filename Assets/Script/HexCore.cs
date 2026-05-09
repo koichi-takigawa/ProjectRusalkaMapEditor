@@ -1,0 +1,272 @@
+﻿using System;
+
+namespace JL.Tactics
+{
+    /// <summary>方向</summary>
+    internal enum Direction
+    {
+        Direction_Invalid = 0,
+
+        /// <summary>01時方向(q+r-)</summary>
+        Direction_01 = 30,
+
+        /// <summary>03時方向(q+)</summary>
+        Direction_03 = 90,
+
+        /// <summary>05時方向(r+)</summary>
+        Direction_05 = 150,
+
+        /// <summary>07時方向(q-r+)</summary>
+        Direction_07 = 210,
+
+        /// <summary>09時方向(q-)</summary>
+        Direction_09 = 270,
+
+        /// <summary>11時方向(r-)</summary>
+        Direction_11 = 330,
+    }
+
+    /// <summary>六角形位置の差分</summary>
+    internal class Hex2Offset
+    {
+        public Hex2Offset(int q, int r)
+        {
+            this.Q = q;
+            this.R = r;
+        }
+
+        /// <summary>
+        /// q軸値。x軸相当の軸。
+        /// </summary>
+        public int Q { get; set; }
+
+        /// <summary>
+        /// r軸値。11時(-) - 5時(+) 方向の軸で、UnityのZ軸とはプラスマイナスが逆。
+        /// </summary>
+        public int R { get; set; }
+
+        /// <summary>
+        /// s軸値。readonly
+        /// </summary>
+        public int S { get { return -(Q + R); } }
+
+        /// <summary>
+        /// ステップ数を返す。
+        /// </summary>
+        public int Step
+        {
+            get
+            {
+                return (Math.Abs(Q) + Math.Abs(R) + Math.Abs(S)) / 2;
+            }
+        }
+    }
+
+    /// <summary>六角形位置</summary>
+    internal class Hex2
+    {
+        const float SQRT_3 = 1.7320508f;
+
+        public int Q { get; set; }
+        public int R { get; set; }
+        public int S { get { return -Q - R; } }
+
+        public Hex2() { }
+
+        public Hex2(int q, int r)
+        {
+            this.Q = q;
+            this.R = r;
+        }
+
+        public static bool operator ==(Hex2 a, Hex2 b)
+        {
+            if (a is null && b is null) return true;
+            if (a is null || b is null) return false;
+            return a.Q == b.Q && a.R == b.R;
+        }
+
+        public static bool operator !=(Hex2 a, Hex2 b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Hex2 hex)
+            {
+                return Q == hex.Q && R == hex.R;
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return (1000 + Q) * 1000000 + (1000 + R) * 1000;
+        }
+
+        /// <summary>
+        /// 六角形に外接する円の半径が１である単位系でのHexの位置を求める。
+        /// </summary>
+        /// <param name="x">正規化座標X</param>
+        /// <param name="y">正規化座標Y</param>
+        /// <returns></returns>
+        public static Hex2 ToHex(float x, float y)
+        {
+#if false
+            float fracQ = 2.0F / 3.0F * x;
+            float fracR = -1.0F / 3.0F * x + SQRT_3 / 3.0F * y;
+#else
+            float fracQ = (SQRT_3 / 3 * x + 1.0F / 3 * y);
+            float fracR = -(2.0F / 3 * y);
+#endif
+            float fracS = -fracQ - fracR;
+
+            int q = (int)Math.Round(fracQ);
+            int r = (int)Math.Round(fracR);
+            int s = (int)Math.Round(fracS);
+
+            float qDiff = Math.Abs(q - fracQ);
+            float rDiff = Math.Abs(r - fracR);
+            float sDiff = Math.Abs(s - fracS);
+
+            if (qDiff > rDiff && qDiff > sDiff)
+            {
+                q = -r - s;
+            }
+            else if (rDiff > sDiff)
+            {
+                r = -q - s;
+            }
+            else
+            {
+                s = -q - r;
+            }
+
+            return new Hex2(q, r);
+        }
+
+        /// <summary>
+        /// 六角形に外接する円の半径が１である単位系でのHexの位置を求める。
+        /// </summary>
+        /// <param name="x">正規化座標X</param>
+        /// <param name="y">正規化座標Y</param>
+        public void ToPointFloat(out float x, out float y)
+        {
+#if false
+            x = q * 3.0F / 2.0F;
+            y = SQRT_3 * (q / 2.0F + r);
+#else
+            x = SQRT_3 * (Q + R / 2.0F);
+            y = -R * 3.0F / 2.0F;
+#endif
+        }
+
+        /// <summary>
+        /// 六角形間の距離をもとめる。隣のマスは１
+        /// </summary>
+        /// <param name="hex"></param>
+        /// <returns></returns>
+        public int StepTo(Hex2 hex)
+        {
+            return (this - hex).Step;
+        }
+
+        /// <summary>指定方向に移動したHexを返す。</summary>
+        public Hex2 MoveTo(Direction dir)
+        {
+            return dir switch
+            {
+                Direction.Direction_01 => new Hex2(Q + 1, R - 1),
+                Direction.Direction_03 => new Hex2(Q + 1, R),
+                Direction.Direction_05 => new Hex2(Q, R + 1),
+                Direction.Direction_07 => new Hex2(Q - 1, R + 1),
+                Direction.Direction_09 => new Hex2(Q - 1, R),
+                Direction.Direction_11 => new Hex2(Q, R - 1),
+                _ => this,
+            };
+        }
+
+        // 加算
+        public static Hex2 operator +(Hex2 lhs, Hex2Offset rhs)
+        {
+            return new Hex2(lhs.Q + rhs.Q, lhs.R + rhs.R);
+        }
+
+        // 減算
+        public static Hex2Offset operator -(Hex2 lhs, Hex2 rhs)
+        {
+            return new Hex2Offset(lhs.Q - rhs.Q, lhs.R - rhs.R);
+        }
+    }
+
+    /// <summary>六角形位置＋高さの差分</summary>
+    internal class Hex3Offset
+    {
+        public int Q { get; set; }
+        public int R { get; set; }
+        public int S { get { return -Q - R; } }
+        public int H { get; set; }
+
+        public Hex3Offset(int q, int r, int h)
+        {
+            this.Q = q;
+            this.R = r;
+            this.H = h;
+        }
+
+        public override int GetHashCode()
+        {
+            return (1000 + Q) * 1000000 + (1000 + R) * 1000 + (1000 + H);
+        }
+    }
+
+    /// <summary>六角形位置＋高さ</summary>
+    internal class Hex3 : Hex2
+    {
+        public static Hex3 Zero = new(0, 0, 0);
+
+        public int H { get; set; }
+
+        public Hex3() { }
+
+        public Hex3(int q, int r, int h)
+        {
+            this.Q = q;
+            this.R = r;
+            this.H = h;
+        }
+
+        public override int GetHashCode()
+        {
+            return (1000 + Q) * 1000000 + (1000 + R) * 1000 + (1000 + H);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Hex3 other)
+            {
+                return this.Q == other.Q && this.R == other.R && this.H == other.H;
+            }
+            return false;
+        }
+
+        public static Hex3 operator +(Hex3 a, Hex3Offset b)
+        {
+            return new Hex3(a.Q + b.Q, a.R + b.R, a.H + b.H);
+        }
+
+        public static bool operator ==(Hex3 a, Hex3 b)
+        {
+            if (a is null && b is null) return true;
+            if (a is null || b is null) return false;
+            return a.Q == b.Q && a.R == b.R && a.H == b.H;
+        }
+
+        public static bool operator !=(Hex3 a, Hex3 b)
+        {
+            return !(a == b);
+        }
+    }
+}
