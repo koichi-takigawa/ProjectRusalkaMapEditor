@@ -7,22 +7,22 @@ namespace JL.Tactics
     {
         Direction_Invalid = 0,
 
-        // <summary>01Žž•ûŒü(q+r-)</summary>
+        /// <summary>01Žž•ûŒü(q+r-)</summary>
         Direction_01 = 30,
 
-        // <summary>03Žž•ûŒü(q+)</summary>
+        /// <summary>03Žž•ûŒü(q+)</summary>
         Direction_03 = 90,
 
-        // <summary>05Žž•ûŒü(r+)</summary>
+        /// <summary>05Žž•ûŒü(r+)</summary>
         Direction_05 = 150,
 
-        // <summary>07Žž•ûŒü(q-r+)</summary>
+        /// <summary>07Žž•ûŒü(q-r+)</summary>
         Direction_07 = 210,
 
-        // <summary>09Žž•ûŒü(q-)</summary>
+        /// <summary>09Žž•ûŒü(q-)</summary>
         Direction_09 = 270,
 
-        // <summary>11Žž•ûŒü(r-)</summary>
+        /// <summary>11Žž•ûŒü(r-)</summary>
         Direction_11 = 330,
     }
 
@@ -81,12 +81,14 @@ namespace JL.Tactics
 
         public static bool operator ==(Hex2 a, Hex2 b)
         {
+            if (a is null && b is null) return true;
+            if (a is null || b is null) return false;
             return a.Q == b.Q && a.R == b.R;
         }
 
         public static bool operator !=(Hex2 a, Hex2 b)
         {
-            return a.Q != b.Q || a.R != b.R;
+            return !(a == b);
         }
 
         public override bool Equals(object obj)
