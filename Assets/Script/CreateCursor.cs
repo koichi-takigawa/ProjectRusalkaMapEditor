@@ -45,8 +45,14 @@ public class CreateCursor : MonoBehaviour
         }
 
         mesh.vertices = vertices;
-        // 重要：ここで「これは三角形ではなく線です」と指定する
+
+        // ここで線であることを指定する
         mesh.SetIndices(indices, MeshTopology.Lines, 0);
+
+        // 法線やUVは必要ないので省略
+
+        // boundsの再計算
+        mesh.RecalculateBounds();
 
         GetComponent<MeshFilter>().mesh = mesh;
     }

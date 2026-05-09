@@ -1,4 +1,5 @@
 ﻿using System;
+using Unity.VisualScripting;
 using UnityEngine;
 #nullable enable
 
@@ -25,29 +26,29 @@ public class CameraController : MonoBehaviour
     const float FIELD_OF_VIEW_RANGE_MIN = 4;
     const float INIT_FIELD_OF_VIEW = 6;
 
-    // カメラ。FieldOfView設定用に使用
-    Camera mCamera = default!;
-
-    // 注視点。ここを基準に動かす。
-    Vector3 mTarget = Vector3.zero;
-
     // アイレベル
-    [SerializeField]
-    float m_EyeHeight = 1.0f;
+    [SerializeField] float m_EyeHeight = 1.0f;
 
-    // 水平回転角度
-    float mYaw = 22.5f;
+    // カメラ。FieldOfView設定用に使用
+    [System.NonSerialized] public Camera MainCamera = default!;
 
     // 上下回り込み角度
-    public float Pitch = 30.0f;
+    [System.NonSerialized] public float Pitch = 30.0f;
+
+    // 注視点。ここを基準に動かす。
+    private Vector3 mTarget = Vector3.zero;
+
+    // 水平回転角度
+    private float mYaw = 22.5f;
 
     // カメラの表示範囲
     float FieldOfView
     {
-        get => mCamera.fieldOfView;
-        set => mCamera.fieldOfView = value;
+        get => MainCamera.fieldOfView;
+        set => MainCamera.fieldOfView = value;
     }
 
+    // 移動モード用の変数
     private Vector3 mLastHitPoint;
     private Plane mMovePlane;
 
@@ -57,7 +58,7 @@ public class CameraController : MonoBehaviour
         Instance = this;
 
         // 各種コンポーネントを取得。
-        mCamera = this.GetComponentWithError<Camera>();
+        MainCamera = this.GetComponentWithError<Camera>();
 
         // 各種エラー出力
         ;
@@ -83,7 +84,7 @@ public class CameraController : MonoBehaviour
     internal void PrepareMove(Vector3 mousePosition)
     {
         // マウス位置からRayを作成
-        Ray ray = mCamera.ScreenPointToRay(mousePosition);
+        Ray ray = MainCamera.ScreenPointToRay(mousePosition);
 
         // 地面にレイキャストして、衝突点を記憶
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
@@ -118,7 +119,7 @@ public class CameraController : MonoBehaviour
     /// <param name="mousePosition"></param>
     internal void Move(Vector3 mousePosition)
     {
-        Ray ray = mCamera.ScreenPointToRay(mousePosition);
+        Ray ray = MainCamera.ScreenPointToRay(mousePosition);
 
         if (mMovePlane.Raycast(ray, out float enter))
         {
@@ -208,6 +209,6 @@ public class CameraController : MonoBehaviour
     /// <param name="mouseWheelScroll"></param>
     internal void Wheel(float mouseWheelScroll)
     {
-        FieldOfView = Math.Min(FIELD_OF_VIEW_RANGE_MAX, Math.Max(FIELD_OF_VIEW_RANGE_MIN, mCamera.fieldOfView - mouseWheelScroll * ZOOM_SPEED));
+        FieldOfView = Math.Min(FIELD_OF_VIEW_RANGE_MAX, Math.Max(FIELD_OF_VIEW_RANGE_MIN, MainCamera.fieldOfView - mouseWheelScroll * ZOOM_SPEED));
     }
 }

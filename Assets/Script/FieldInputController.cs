@@ -273,7 +273,7 @@ public class FieldInputController : MonoBehaviour
     internal bool GetCursorPos(out Hex3 hex)
     {
         // レイを飛ばす
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = CameraController.Instance.MainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out var hit))
         {
             // thicknessの半分だけずらす。
