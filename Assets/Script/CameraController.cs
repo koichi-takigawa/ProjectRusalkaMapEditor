@@ -61,7 +61,7 @@ public class CameraController : MonoBehaviour
         MainCamera = this.GetComponentWithError<Camera>();
 
         // 各種エラー出力
-        ;
+        Debug.Assert(MainCamera != null, this.GetType().Name + ".MainCamera is null.");
 
         // FieldOfViewの適用
         FieldOfView = INIT_FIELD_OF_VIEW;

@@ -67,7 +67,7 @@ internal static class UnityHelper
             return result;
         }
 
-        Debug.LogError(monoBehaviour.GetType().Name + " doesn't have " + typeof(T).Name);
+        Debug.LogError(monoBehaviour.name + " doesn't have " + typeof(T).Name);
         return default!;
     }
 }

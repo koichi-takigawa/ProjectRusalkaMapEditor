@@ -153,7 +153,7 @@ namespace JL.Tactics
                             case 's':
                                 {
                                     // バージョン
-                                    byte version = reader.ReadByte();
+                                    _ = reader.ReadByte();
 
                                     // データ数
                                     ushort dataCount = reader.ReadUInt16();
@@ -278,8 +278,14 @@ namespace JL.Tactics
 
                             case 'e':
 
+                                // グリッド情報を変換
+                                foreach (var kv in grids)
+                                {
+                                    Grids[kv.Key] = new Grid() { StandPoints = kv.Value.ToArray() };
+                                }
+
                                 // 正常終了
-                                break;
+                                return true;
 
                             default:
 
@@ -289,13 +295,7 @@ namespace JL.Tactics
                     }
                 }
 
-                // グリッド情報を変換
-                foreach (var kv in grids)
-                {
-                    Grids[kv.Key] = new Grid() { StandPoints = kv.Value.ToArray() };
-                }
-
-                return true;
+                return false;
             }
         }
     }

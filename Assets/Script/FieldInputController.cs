@@ -113,6 +113,7 @@ public class FieldInputController : MonoBehaviour
         // Move中でかつドラッグを開始していない場合はカーソル更新停止
         if (mButton != MouseButton.Invalid && mIsDragging == false)
         {
+            // ボタン押下中でまだドラッグ開始前のため、このフレームではカーソル更新を行わない。
             ;
         }
         // UI上にカーソルがあるか、ボタンが押されている場合、カーソルが画面外にある場合または位置が取得できない場合はカーソル無効
