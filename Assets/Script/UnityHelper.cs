@@ -7,7 +7,7 @@ internal static class UnityHelper
     /// コンポーネントの取得を試みる。取得できなかった場合はエラーログを出力する。
     /// </summary>
     /// <typeparam name="T">取得するコンポーネントの型</typeparam>
-    /// <param name="mono">コンポーネントを取得するゲームオブジェクト</param>
+    /// <param name="gameObject">コンポーネントを取得するゲームオブジェクト</param>
     /// <param name="result">取得したコンポーネントの格納先</param>
     public static bool TryGetComponentWithError<T>(this GameObject gameObject, out T result) where T : Component
     {
@@ -16,7 +16,7 @@ internal static class UnityHelper
             return true;
         }
 
-        Debug.LogError(gameObject.GetType().Name + " doesn't have " + typeof(T).Name);
+        Debug.LogError(gameObject.name + " doesn't have " + typeof(T).Name);
         return false;
     }
 
@@ -33,7 +33,7 @@ internal static class UnityHelper
             return result;
         }
 
-        Debug.LogError(gameObject.GetType().Name + " doesn't have " + typeof(T).Name);
+        Debug.LogError(gameObject.name + " doesn't have " + typeof(T).Name);
         return default!;
     }
 
@@ -50,7 +50,7 @@ internal static class UnityHelper
             return true;
         }
 
-        Debug.LogError(monoBehaviour.GetType().Name + " doesn't have " + typeof(T).Name);
+        Debug.LogError(monoBehaviour.name + " doesn't have " + typeof(T).Name);
         return false;
     }
 
