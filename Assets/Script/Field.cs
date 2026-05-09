@@ -47,6 +47,9 @@ namespace JL.Tactics
                 UpperSpace = upperSpace;
                 WaterDepth = waterDepth;
                 IsEnterable = isEnterable;
+
+                // kind(地点種別は今後用)
+                _ = kind;
             }
         }
 
@@ -122,7 +125,8 @@ namespace JL.Tactics
                 {
                     while (reader.PeekChar() != -1)
                     {
-                        switch (reader.ReadChar())
+                        var code = reader.ReadChar();
+                        switch (code)
                         {
                             case 'v':
 
@@ -279,7 +283,7 @@ namespace JL.Tactics
 
                             default:
 
-                                exportError?.Invoke($"Unknown Field Info Version Header: {(char)reader.PeekChar()}");
+                                exportError?.Invoke($"Unknown Field Info Version Header: {code}");
                                 return false;
                         }
                     }
