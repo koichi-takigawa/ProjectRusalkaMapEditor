@@ -24,7 +24,7 @@ internal static class UnityHelper
     /// コンポーネントの取得を試みる。取得できなかった場合はエラーログを出力する。
     /// </summary>
     /// <typeparam name="T">取得するコンポーネントの型</typeparam>
-    /// <param name="mono">コンポーネントを取得するゲームオブジェクト</param>
+    /// <param name="gameObject">コンポーネントを取得するゲームオブジェクト</param>
     /// <returns>取得したコンポーネント</returns>
     public static T GetComponentWithError<T>(this GameObject gameObject) where T : Component
     {
@@ -41,7 +41,7 @@ internal static class UnityHelper
     /// コンポーネントの取得を試みる。取得できなかった場合はエラーログを出力する。
     /// </summary>
     /// <typeparam name="T">取得するコンポーネントの型</typeparam>
-    /// <param name="mono">コンポーネントを取得するゲームオブジェクト</param>
+    /// <param name="monoBehaviour">コンポーネントを取得するゲームオブジェクト</param>
     /// <param name="result">取得したコンポーネントの格納先</param>
     public static bool TryGetComponentWithError<T>(this MonoBehaviour monoBehaviour, out T result) where T : Component
     {
@@ -58,7 +58,7 @@ internal static class UnityHelper
     /// コンポーネントの取得を試みる。取得できなかった場合はエラーログを出力する。
     /// </summary>
     /// <typeparam name="T">取得するコンポーネントの型</typeparam>
-    /// <param name="mono">コンポーネントを取得するゲームオブジェクト</param>
+    /// <param name="monoBehaviour">コンポーネントを取得するゲームオブジェクト</param>
     /// <returns>取得したコンポーネント</returns>
     public static T GetComponentWithError<T>(this MonoBehaviour monoBehaviour) where T : Component
     {
