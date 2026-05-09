@@ -2,7 +2,7 @@
 
 namespace JL.Tactics
 {
-    // <summary>方向</summary>
+    /// <summary>方向</summary>
     internal enum Direction
     {
         Direction_Invalid = 0,
@@ -26,7 +26,7 @@ namespace JL.Tactics
         Direction_11 = 330,
     }
 
-    // <summary>六角形位置の差分</summary>
+    /// <summary>六角形位置の差分</summary>
     internal class Hex2Offset
     {
         public Hex2Offset(int q, int r)
@@ -62,7 +62,7 @@ namespace JL.Tactics
         }
     }
 
-    // <summary>六角形位置</summary>
+    /// <summary>六角形位置</summary>
     internal class Hex2
     {
         const float SQRT_3 = 1.7320508f;
@@ -173,7 +173,7 @@ namespace JL.Tactics
             return (this - hex).Step;
         }
 
-        // <summary>指定方向に移動したHexを返す。</summary>
+        /// <summary>指定方向に移動したHexを返す。</summary>
         public Hex2 MoveTo(Direction dir)
         {
             return dir switch
@@ -201,7 +201,7 @@ namespace JL.Tactics
         }
     }
 
-    // <summary>六角形位置＋高さの差分</summary>
+    /// <summary>六角形位置＋高さの差分</summary>
     internal class Hex3Offset
     {
         public int Q { get; set; }
@@ -222,7 +222,7 @@ namespace JL.Tactics
         }
     }
 
-    // <summary>六角形位置＋高さ</summary>
+    /// <summary>六角形位置＋高さ</summary>
     internal class Hex3 : Hex2
     {
         public static Hex3 Zero = new(0, 0, 0);
