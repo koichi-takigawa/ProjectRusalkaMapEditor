@@ -28,8 +28,22 @@ public class FieldInputController : MonoBehaviour
     /// <summary>ロック中かどうか</summary>
     public bool Lock
     {
-        get { return mLockingCounter != 0; }
-        set { if (value) { mLockingCounter++; } else { mLockingCounter--; } }
+        get => mLockingCounter != 0;
+        set
+        {
+            if (value)
+            {
+                mLockingCounter++;
+            }
+            else if (mLockingCounter > 0)
+            {
+                mLockingCounter--;
+            }
+            else
+            {
+                Debug.LogWarning("FieldInputController: Lock is already false.");
+            }
+        }
     }
 
     /// <summary>マウスのボタン種類</summary>
