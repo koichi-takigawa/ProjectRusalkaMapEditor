@@ -48,8 +48,8 @@ public class CameraController : MonoBehaviour
         set => mCamera.fieldOfView = value;
     }
 
-    public Vector3 mLastHitPoint;
-    public Plane mMovePlane;
+    private Vector3 mLastHitPoint;
+    private Plane mMovePlane;
 
     private void Awake()
     {
@@ -83,7 +83,7 @@ public class CameraController : MonoBehaviour
     internal void PrepareMove(Vector3 mousePosition)
     {
         // マウス位置からRayを作成
-        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+        Ray ray = mCamera.ScreenPointToRay(mousePosition);
 
         // 地面にレイキャストして、衝突点を記憶
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
@@ -118,7 +118,7 @@ public class CameraController : MonoBehaviour
     /// <param name="mousePosition"></param>
     internal void Move(Vector3 mousePosition)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray ray = mCamera.ScreenPointToRay(mousePosition);
 
         if (mMovePlane.Raycast(ray, out float enter))
         {

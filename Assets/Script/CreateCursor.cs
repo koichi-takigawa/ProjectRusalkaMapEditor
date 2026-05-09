@@ -1,6 +1,8 @@
 using JL.Tactics;
 using UnityEngine;
 
+[RequireComponent(typeof(MeshFilter))]
+[RequireComponent(typeof(MeshRenderer))]
 public class CreateCursor : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
