@@ -50,17 +50,23 @@ public class Main : MonoBehaviour
         EdittingMapFilePath = null;
         HasChanges = false;
 
+        // エラー表示
+        Debug.Assert(ButtonNewMap != null, $"{this.name}.ButtonNewMap is null.");
+        Debug.Assert(ButtonLoad != null, $"{this.name}.ButtonLoad is null.");
+        Debug.Assert(ButtonSave != null, $"{this.name}.ButtonSave is null.");
+        Debug.Assert(ButtonSaveWithNamed != null, $"{this.name}.ButtonSaveWithNamed is null.");
+
         // 新規作成ボタン
-        ButtonNewMap.onClick.AddListener(OnNew);
+        ButtonNewMap?.onClick.AddListener(OnNew);
 
         // 開くボタン
-        ButtonLoad.onClick.AddListener(OnOpen);
+        ButtonLoad?.onClick.AddListener(OnOpen);
 
         // 上書き保存ボタン
-        ButtonSave.onClick.AddListener(OnSave);
+        ButtonSave?.onClick.AddListener(OnSave);
 
         // 名前を付けて保存ボタン
-        ButtonSaveWithNamed.onClick.AddListener(OnSaveWithNamed);
+        ButtonSaveWithNamed?.onClick.AddListener(OnSaveWithNamed);
     }
 
     /// <summary>
@@ -118,7 +124,7 @@ public class Main : MonoBehaviour
 
         OpenFileName ofn = new OpenFileName();
         ofn.title = "マップデータを開く";
-        ofn.filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0";
+        ofn.filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0\0";
 
         // フラグ設定
         // 0x00080000: OFN_EXPLORER (新しいスタイルのダイアログを使用)
@@ -128,7 +134,7 @@ public class Main : MonoBehaviour
         ofn.flags = 0x00080000 | 0x00000008 | 0x00000800 | 0x00001000;
 
         // 開くダイアログを表示
-        if (Dialog.GetOpenFileName(ofn) == false)
+        if (Dialog.ShowOpenFileDialog(ofn) == false)
         {
             // 失敗した場合、エラーコードを確認（0以外なら何らかの設定ミス）
             // [DllImport("comdlg32.dll")] public static extern int CommDlgExtendedError();
@@ -159,7 +165,7 @@ public class Main : MonoBehaviour
     {
         OpenFileName sfn = new OpenFileName();
         sfn.title = "マップデータを名前を付けて保存";
-        sfn.filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0";
+        sfn.filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0\0";
 
         // フラグ設定
         // 0x00080000: OFN_EXPLORER (新しいスタイルのダイアログを使用)
@@ -168,7 +174,7 @@ public class Main : MonoBehaviour
         // 0x00000004: OFN_HIDEREADONLY (読み取り専用チェックボックスを隠す)
         sfn.flags = 0x00080000 | 0x00000008 | 0x00000002 | 0x00000004;
 
-        if (Dialog.GetSaveFileName(sfn) == false)
+        if (Dialog.ShowSaveFileDialog(sfn) == false)
         {
             // 失敗した場合、エラーコードを確認（0以外なら何らかの設定ミス）
             // [DllImport("comdlg32.dll")] public static extern int CommDlgExtendedError();

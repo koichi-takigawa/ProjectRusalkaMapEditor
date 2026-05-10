@@ -7,7 +7,7 @@ public class OpenFileName
     public int structSize = 0;
     public IntPtr dlgOwner = IntPtr.Zero;
     public IntPtr instance = IntPtr.Zero;
-    public string filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0";
+    public string filter = null;
     public string customFilter = null;
     public int maxCustFilter = 0;
     public int filterIndex = 0;
@@ -68,23 +68,49 @@ public static class Dialog
         IDNO     = 7
     }
 
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     // 開く用に追加
     [DllImport("comdlg32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    public static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
+    private static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
 
     // 保存用に追加
     [DllImport("comdlg32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-    public static extern bool GetSaveFileName([In, Out] OpenFileName ofn);
+    private static extern bool GetSaveFileName([In, Out] OpenFileName ofn);
 
     // メッセージボックス用に追加
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern int MessageBox(IntPtr hWnd, string text, string caption, uint type);
+#endif
+
+    // ファイルを開くダイアログのラッパー関数
+    public static bool ShowOpenFileDialog([In, Out] OpenFileName ofn)
+    {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        return GetOpenFileName(ofn);
+#else
+        return false;
+#endif
+    }
+
+    // ファイルを保存するダイアログのラッパー関数
+    public static bool ShowSaveFileDialog([In, Out] OpenFileName ofn)
+    {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+        return GetSaveFileName(ofn);
+#else
+        return false;
+#endif
+    }
 
     // メッセージボックスのラッパー関数
     public static MessageBoxResult ShowMessageBox(string text, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
     {
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
         uint type = (uint)buttons | (uint)icon;
         int result = MessageBox(IntPtr.Zero, text, caption, type);
         return (MessageBoxResult)result;
+#else
+        return MessageBoxResult.IDCANCEL;
+#endif
     }
 }
