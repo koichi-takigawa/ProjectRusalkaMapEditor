@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class Main : MonoBehaviour
@@ -183,7 +184,7 @@ public class Main : MonoBehaviour
         }
 
         // 選択されたファイルパスを取得して更新
-        EdittingMapFilePath = sfn.file;
+        EdittingMapFilePath = Path.GetFullPath(sfn.file.Trim());
 
         // 変更なしにする
         HasChanges = false;
