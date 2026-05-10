@@ -108,12 +108,12 @@ public class Main : MonoBehaviour
                 Dialog.MessageBoxIcon.Question
             );
 
-            // キャンセルされた場合は、新規作成を中止する
+            // キャンセルされた場合は、ファイルを開く処理を中止する
             if (dialogResult != Dialog.MessageBoxResult.IDOK)
                 return;
 
-            // 変更を破棄して新規作成
-            Debug.Log("Discarding changes and creating a new map...");
+            // 変更を破棄してファイルを開く
+            Debug.Log("Discarding changes and opening a map...");
         }
 
         OpenFileName ofn = new OpenFileName();
