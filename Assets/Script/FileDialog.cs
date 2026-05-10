@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
 public class OpenFileName
