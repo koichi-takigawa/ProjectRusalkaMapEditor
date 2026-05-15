@@ -71,6 +71,9 @@ internal class Main : MonoBehaviour
         Debug.Assert(ButtonLoad != null, $"{this.name}.ButtonLoad is null.");
         Debug.Assert(ButtonSave != null, $"{this.name}.ButtonSave is null.");
         Debug.Assert(ButtonSaveWithNamed != null, $"{this.name}.ButtonSaveWithNamed is null.");
+
+        Debug.Assert(Materials != null && Materials.Length > 0, $"{this.name}.Materials is null or empty.");
+        Debug.Assert(MapRoot != null, $"{this.name}.MapRoot is null.");
     }
 
     /// <summary>

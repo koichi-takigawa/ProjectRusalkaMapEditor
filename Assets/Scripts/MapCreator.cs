@@ -231,6 +231,12 @@ public class MapCreator
     // 8x8の区画ごとにメッシュを生成する
     internal static void CreateMeshPart(FieldView field, GameObject gameObject, int baseQ, int baseR, Material[] materials)
     {
+        // マテリアルがない場合はスキップ
+        if (materials == null || materials.Length == 0)
+        {
+            return;
+        }
+
         // メイン形状の座標リスト
         List<Vector3> listVertices = new List<Vector3>();
 
@@ -345,11 +351,10 @@ public class MapCreator
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
 
-        // 4. MeshFilterにメッシュをセット
+        // MeshFilterにメッシュをセット
         meshFilter.mesh = mesh;
 
-        // 5. マテリアルを設定（これをしないと表示されません）
-        // とりあえず標準のシェーダーを割り当てる例
+        // マテリアルを設定
         meshRenderer.material = materials[0];
     }
 
