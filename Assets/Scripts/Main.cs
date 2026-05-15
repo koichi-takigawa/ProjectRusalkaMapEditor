@@ -1,8 +1,11 @@
-﻿using System.IO;
+﻿using JL.Tactics;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Main : MonoBehaviour
+internal class Main : MonoBehaviour
 {
     /// <summary>新規作成ボタン</summary>
     [SerializeField] Button ButtonNewMap;
@@ -16,8 +19,20 @@ public class Main : MonoBehaviour
     /// <summary>名前をつけて保存ボタン</summary>
     [SerializeField] Button ButtonSaveWithNamed;
 
+    /// <summary>マテリアル</summary>
+    [SerializeField] Material[] Materials;
+
+    /// <summary>マップデータのルート</summary>
+    [SerializeField] Transform MapRoot;
+
+    /// <summary>MapのGameObject</summary>
+    private Dictionary<(int q, int r), GameObject> EdittingGameObjects = new Dictionary<(int q, int r), GameObject>();
+
     /// <summary>編集中のMapFile名</summary>
-    public static string EdittingMapFilePath = null;
+    [System.NonSerialized] public static string EdittingMapFilePath = null;
+
+    /// <summary>FieldView</summary>
+    [System.NonSerialized] public static FieldView EdittingFieldView = new FieldView();
 
     /// <summary>
     /// 変更有無(true:変更あり、false:変更なし)。変更がある場合は、マップを閉じる前に保存するか確認する。
@@ -56,18 +71,6 @@ public class Main : MonoBehaviour
         Debug.Assert(ButtonLoad != null, $"{this.name}.ButtonLoad is null.");
         Debug.Assert(ButtonSave != null, $"{this.name}.ButtonSave is null.");
         Debug.Assert(ButtonSaveWithNamed != null, $"{this.name}.ButtonSaveWithNamed is null.");
-
-        // 新規作成ボタン
-        ButtonNewMap?.onClick.AddListener(OnNew);
-
-        // 開くボタン
-        ButtonLoad?.onClick.AddListener(OnOpen);
-
-        // 上書き保存ボタン
-        ButtonSave?.onClick.AddListener(OnSave);
-
-        // 名前を付けて保存ボタン
-        ButtonSaveWithNamed?.onClick.AddListener(OnSaveWithNamed);
     }
 
     /// <summary>
@@ -91,6 +94,12 @@ public class Main : MonoBehaviour
 
             // 変更を破棄して新規作成
             Debug.Log("Discarding changes and creating a new map...");
+        }
+
+        // 既存のマップオブジェクトを削除
+        foreach (var go in EdittingGameObjects.Values)
+        {
+            Destroy(go);
         }
 
         // 編集中のマップファイルパスをリセット
@@ -193,7 +202,90 @@ public class Main : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        // 新規作成ボタン
+        ButtonNewMap?.onClick.AddListener(OnNew);
+
+        // 開くボタン
+        ButtonLoad?.onClick.AddListener(OnOpen);
+
+        // 上書き保存ボタン
+        ButtonSave?.onClick.AddListener(OnSave);
+
+        // 名前を付けて保存ボタン
+        ButtonSaveWithNamed?.onClick.AddListener(OnSaveWithNamed);
+
+        // クリックイベントのテスト
+        FieldInputController.Instance.OnClick += (button, fromPos, toPos) =>
+        {
+            // 有効なボタンと位置が提供されていることを確認
+            if (button != null && fromPos != null && toPos != null)
+            {
+                // ブロック消去
+                switch (button)
+                {
+                    case FieldInputController.Button.Left:
+                        // 左クリックでブロックを追加
+                        HasChanges |= AddBlock(toPos);
+                        break;
+                    case FieldInputController.Button.Right:
+                        // 右クリックでブロックを削除
+                        HasChanges |= RemoveBlock(fromPos);
+                        break;
+                }
+            }
+        };
+    }
+
+    // 指定された位置にブロックを追加する
+    private bool AddBlock(Hex3 pos)
+    {
+        // 指定範囲内
+        if (pos.H >= 0 && pos.H < FieldView.Grid.MAX_H)
+        {
+            // 編集中フィールドから対象のグリッドを取得し、指定された位置にブロックが存在する場合は削除する
+            if (EdittingFieldView.Grids.TryGetValue((pos.Q, pos.R), out FieldView.Grid grid) == false)
+            {
+                // 対象のグリッドが存在しない場合は新規作成して追加する
+                grid = new FieldView.Grid();
+                EdittingFieldView.Grids.Add((pos.Q, pos.R), grid);
+            }
+
+            // 指定の位置に草原を仮設定する
+            grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.草;
+
+            HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
+            MapCreater.Mark(affectedPositions, pos.Q, pos.R);
+
+            // 更新
+            MapCreater.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // 指定された位置のブロックを削除する
+    private bool RemoveBlock(Hex3 pos)
+    {
+        // 編集中フィールドから対象のグリッドを取得し、指定された位置にブロックが存在する場合は削除する
+        if (EdittingFieldView.Grids.TryGetValue((pos.Q, pos.R), out FieldView.Grid grid) && pos.H >= 0 && pos.H < FieldView.Grid.MAX_H)
+        {
+            if (grid.Tiles[pos.H].Kind != FieldView.Tile.TileKind.無し)
+            {
+                grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.無し;
+
+                HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
+                MapCreater.Mark(affectedPositions, pos.Q, pos.R);
+
+                // 更新
+                MapCreater.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Update is called once per frame
