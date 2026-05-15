@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+#nullable enable
 
 public class MapCreator
 {
@@ -306,7 +307,7 @@ public class MapCreator
                 for (int i = 0; i < (int)DIRECTIONS.Length; i++)
                 {
                     // 内外判定
-                    FieldView.Tile nextTile = field[grid.Key.q + DIRECTIONS[i].Q, grid.Key.r + DIRECTIONS[i].R, h + DIRECTIONS[i].H];
+                    FieldView.Tile? nextTile = field[grid.Key.q + DIRECTIONS[i].Q, grid.Key.r + DIRECTIONS[i].R, h + DIRECTIONS[i].H];
 
                     // 必要
                     if (nextTile == null ||
@@ -364,8 +365,8 @@ public class MapCreator
                 for (int h = FieldView.Grid.MAX_H - 1; h >= 0; h--)
                 {
                     // 現在ブロック
-                    FieldView.Tile currentTile = grid.Value.Tiles[h];
-                    FieldView.Tile nextTile = field[grid.Key.q + DIRECTIONS[i].Q, grid.Key.r + DIRECTIONS[i].R, h + DIRECTIONS[i].H];
+                    FieldView.Tile? currentTile = grid.Value.Tiles[h];
+                    FieldView.Tile? nextTile = field[grid.Key.q + DIRECTIONS[i].Q, grid.Key.r + DIRECTIONS[i].R, h + DIRECTIONS[i].H];
 
                     // 書き込みが必要ない
                     if (currentTile == null || currentTile.Kind == FieldView.Tile.TileKind.無し ||

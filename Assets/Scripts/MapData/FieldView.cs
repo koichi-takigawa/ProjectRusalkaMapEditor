@@ -1,6 +1,7 @@
 ﻿using JL.Tactics;
 using System;
 using System.Collections.Generic;
+#nullable enable
 
 internal class FieldView
 {
@@ -71,11 +72,11 @@ internal class FieldView
         }
     }
 
-    public Tile this[int q, int r, int h]
+    public Tile? this[int q, int r, int h]
     {
         get => Grids.TryGetValue((q, r), out Grid grid) && h >= 0 && h < Grid.MAX_H ? grid.Tiles[h] : null;
     } 
-    public Tile this[Hex2 hex, int h]
+    public Tile? this[Hex2 hex, int h]
     {
         get => Grids.TryGetValue((hex.Q, hex.R), out Grid grid) && h >= 0 && h < Grid.MAX_H ? grid.Tiles[h] : null;
     }
