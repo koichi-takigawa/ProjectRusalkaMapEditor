@@ -254,8 +254,8 @@ public class MapCreater
                 }
 
                 // 陸関係のみ処理
-                if ((int)currentTile.Kind < (int)FieldView.Tile.TileKind.陸系タイル開始 ||
-                    (int)FieldView.Tile.TileKind.陸系タイル終了 < (int)currentTile.Kind)
+                if ((int)currentTile.Kind <= (int)FieldView.Tile.TileKind.陸系タイル開始 ||
+                    (int)FieldView.Tile.TileKind.陸系タイル終了 <= (int)currentTile.Kind)
                 {
                     continue;
                 }
@@ -310,8 +310,8 @@ public class MapCreater
 
                     // 必要
                     if (nextTile == null ||
-                        (int)nextTile.Kind < (int)FieldView.Tile.TileKind.陸系タイル開始 ||
-                        (int)FieldView.Tile.TileKind.陸系タイル終了 < (int)nextTile.Kind)
+                        (int)nextTile.Kind <= (int)FieldView.Tile.TileKind.陸系タイル開始 ||
+                        (int)FieldView.Tile.TileKind.陸系タイル終了 <= (int)nextTile.Kind)
                     {
                         // 登録
                         CreateTriangles(positions, POSITION_INDICES[i], ref listVertices);
@@ -398,7 +398,6 @@ public class MapCreater
                     Vector3[] positions = new Vector3[POSITIONS_INT.Length];
                     for (int j = 0; j < POSITION_INDICES[i].Length; j++)
                     {
-                        var pointInt = centerInt + POSITIONS_INT[POSITION_INDICES[i][j]] * (new Vector3Int(1, startH - h, 1));
                         positions[POSITION_INDICES[i][j]] = new Vector3()
                         {
                             x = (centerInt.x + POSITIONS_INT[POSITION_INDICES[i][j]].x) * SIZE_X,
