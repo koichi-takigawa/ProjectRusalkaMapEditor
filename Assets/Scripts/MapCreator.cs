@@ -9,6 +9,8 @@ public class MapCreator
 {
     /// <summary>
     /// 進行方向ごとのQ,R,Hのオフセット
+    /// 指定の方向にタイルがあるかどうかを判定して、必要な面を生成するために使用する
+    /// 下から見上げることはないため、上方向も含めて7方向とする
     /// </summary>
     static readonly Hex3Offset[] DIRECTIONS = new Hex3Offset[7]
     {
