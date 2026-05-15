@@ -254,10 +254,10 @@ internal class Main : MonoBehaviour
             grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.草;
 
             HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
-            MapCreater.Mark(affectedPositions, pos.Q, pos.R);
+            MapCreator.Mark(affectedPositions, pos.Q, pos.R);
 
             // 更新
-            MapCreater.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
+            MapCreator.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
 
             return true;
         }
@@ -276,10 +276,10 @@ internal class Main : MonoBehaviour
                 grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.無し;
 
                 HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
-                MapCreater.Mark(affectedPositions, pos.Q, pos.R);
+                MapCreator.Mark(affectedPositions, pos.Q, pos.R);
 
                 // 更新
-                MapCreater.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
+                MapCreator.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
 
                 return true;
             }
