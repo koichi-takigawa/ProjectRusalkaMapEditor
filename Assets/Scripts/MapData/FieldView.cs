@@ -70,6 +70,12 @@ internal class FieldView
         {
             get => Tiles.Any(tile => tile.Kind != Tile.TileKind.無し);
         }
+
+        /// <summary>立てる場所の生成</summary>
+        internal void CreateStandPoint()
+        {
+            // TODO:未実装
+        }
     }
 
     public Tile? this[int q, int r, int h]
