@@ -196,7 +196,7 @@ namespace JL.Tactics
 
                                         // 格納用の変数に変換
                                         Hex2 hex = new Hex2(q, r);
-                                        int kind = kindByte < 32 ? (int)(1 << kindByte) : 0;
+                                        uint kind = kindByte < 32 ? (uint)(1u << kindByte) : 0;
                                         bool isEnterable = (flags & 0x1) != 0;
 
                                         // StandPoint生成
