@@ -16,11 +16,21 @@ public class FieldInputController : MonoBehaviour
     [Tooltip("カーソル位置表示用テキスト")]
     [SerializeField] TextMeshProUGUI? CursorPositionText;
 
+    /// <summary>
+    /// ボタン
+    /// </summary>
+    internal enum Button
+    {
+        Left,
+        Right,
+    }
+
     // Hex3?型を受け取るイベントハンドラ
-    internal event Action<Hex3?>? OnClick;
+    internal event Action<Button?, Hex3?, Hex3?>? OnClick;
 
     // カーソル位置
-    private Hex3? mCursorPos = null;
+    private Hex3? mCursorFromPos = null;
+    private Hex3? mCursorToPos = null;
 
     // ロック中カウンタ
     private int mLockingCounter = 0;
@@ -117,10 +127,11 @@ public class FieldInputController : MonoBehaviour
             ;
         }
         // UI上にカーソルがあるか、ボタンが押されている場合、カーソルが画面外にある場合または位置が取得できない場合はカーソル無効
-        else if (isPointerOverGameObject || mButton != MouseButton.Invalid || IsCursorOutOfScreen(mousePosition) || GetCursorPos(out Hex3 hex) == false)
+        else if (isPointerOverGameObject || mButton != MouseButton.Invalid || IsCursorOutOfScreen(mousePosition) || GetCursorPos(out Hex3 fromHex, out Hex3 toHex) == false)
         {
             // カーソルを無効化する
-            mCursorPos = null;
+            mCursorFromPos = null;
+            mCursorToPos = null;
 
             if (CursorObject.activeSelf)
             {
@@ -135,11 +146,12 @@ public class FieldInputController : MonoBehaviour
         else
         {
             // カーソルを有効化する
-            mCursorPos = hex;
+            mCursorFromPos = fromHex;
+            mCursorToPos = toHex;
 
-            hex.ToPointFloat(out float x, out float y);
+            mCursorToPos.ToPointFloat(out float x, out float y);
 
-            CursorObject.transform.position = new Vector3(x * Field.SIZE, hex.H * Field.THICKNESS, y * Field.SIZE);
+            CursorObject.transform.position = new Vector3(x * Field.SIZE, mCursorToPos.H * Field.THICKNESS, y * Field.SIZE);
 
             if (CursorObject.activeSelf == false)
             {
@@ -148,7 +160,7 @@ public class FieldInputController : MonoBehaviour
 
             if (CursorPositionText != null)
             {
-                CursorPositionText.text = $"(q:{hex.Q}, r:{hex.R}, h:{hex.H})";
+                CursorPositionText.text = $"(q:{mCursorFromPos.Q}, r:{mCursorFromPos.R}, h:{mCursorFromPos.H})";
             }
         }
 
@@ -208,7 +220,7 @@ public class FieldInputController : MonoBehaviour
                         if (mIsDragging == false)
                         {
                             // ハンドラが登録されていればイベント発行
-                            OnClick?.Invoke(mCursorPos);
+                            OnClick?.Invoke(Button.Left, mCursorFromPos, mCursorToPos);
                         }
 
                         CameraController.Instance.StopMove(mousePosition);
@@ -234,7 +246,7 @@ public class FieldInputController : MonoBehaviour
                         if (mIsDragging == false)
                         {
                             // ハンドラが登録されていればイベント発行
-                            OnClick?.Invoke(null);
+                            OnClick?.Invoke(Button.Right, mCursorFromPos, mCursorToPos);
                         }
 
                         CameraController.Instance.StopRotation(mousePosition);
@@ -271,23 +283,35 @@ public class FieldInputController : MonoBehaviour
     /// </summary>
     /// <param name="hex"></param>
     /// <returns></returns>
-    internal bool GetCursorPos(out Hex3 hex)
+    internal bool GetCursorPos(out Hex3 fromHex, out Hex3 toHex)
     {
         // レイを飛ばす
         Ray ray = CameraController.Instance.MainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out var hit))
         {
             // thicknessの半分だけずらす。
-            Vector3 pos = hit.point + Vector3.up * Field.THICKNESS / 2;
+            {
+                Vector3 pos = hit.point + hit.normal * Field.THICKNESS / 2;
 
-            Hex2 tmpHex = JL.Tactics.Hex2.ToHex(pos.x / Field.SIZE, pos.z / Field.SIZE);
-            int tmpHeight = (int)Math.Floor(pos.y / Field.THICKNESS);
+                Hex2 tmpHex = JL.Tactics.Hex2.ToHex(pos.x / Field.SIZE, pos.z / Field.SIZE);
+                int tmpHeight = (int)Math.Floor(pos.y / Field.THICKNESS) + 1;
 
-            hex = new Hex3(tmpHex.Q, tmpHex.R, tmpHeight);
+                toHex = new Hex3(tmpHex.Q, tmpHex.R, tmpHeight);
+            }
+            // thicknessの半分だけずらす。
+            {
+                Vector3 pos = hit.point - hit.normal * Field.THICKNESS / 2;
+
+                Hex2 tmpHex = JL.Tactics.Hex2.ToHex(pos.x / Field.SIZE, pos.z / Field.SIZE);
+                int tmpHeight = (int)Math.Floor(pos.y / Field.THICKNESS) + 1;
+
+                fromHex = new Hex3(tmpHex.Q, tmpHex.R, tmpHeight);
+            }
             return true;
         }
 
-        hex = new Hex3();
+        fromHex = new Hex3();
+        toHex = new Hex3();
         return false;
     }
 
