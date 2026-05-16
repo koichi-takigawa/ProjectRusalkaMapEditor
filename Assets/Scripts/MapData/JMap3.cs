@@ -77,98 +77,106 @@ internal class JMap3
     /// <returns>FieldView.Grid群</returns>
     private static Dictionary<Hex2, FieldView.Grid> LoadMain(string fileName, ref int maxXZ)
     {
-        using (System.IO.FileStream ifs = new System.IO.FileStream(fileName, System.IO.FileMode.Open))
-        using (System.IO.Compression.DeflateStream deflateStream = new System.IO.Compression.DeflateStream(ifs, System.IO.Compression.CompressionMode.Decompress))
-        using (System.IO.MemoryStream mem = new System.IO.MemoryStream())
+        try
         {
-            byte[] buffer = new byte[1024];
-            while (true)
+            using (System.IO.FileStream ifs = new System.IO.FileStream(fileName, System.IO.FileMode.Open))
+            using (System.IO.Compression.DeflateStream deflateStream = new System.IO.Compression.DeflateStream(ifs, System.IO.Compression.CompressionMode.Decompress))
+            using (System.IO.MemoryStream mem = new System.IO.MemoryStream())
             {
-                //Deflateで圧縮されたファイルからデータを読み込む
-                int readBytes = deflateStream.Read(buffer, 0, buffer.Length);
-                if (readBytes == 0)
+                byte[] buffer = new byte[1024];
+                while (true)
                 {
-                    break;
+                    //Deflateで圧縮されたファイルからデータを読み込む
+                    int readBytes = deflateStream.Read(buffer, 0, buffer.Length);
+                    if (readBytes == 0)
+                    {
+                        break;
+                    }
+
+                    //解凍されたデータを書き込む
+                    mem.Write(buffer, 0, readBytes);
                 }
 
-                //解凍されたデータを書き込む
-                mem.Write(buffer, 0, readBytes);
-            }
-
-            // 始点位置に戻す
-            mem.Position = 0;
-            using (System.IO.BinaryReader br = new System.IO.BinaryReader(mem))
-            {
-                ushort version = br.ReadUInt16();
-
-                // バージョン３以外は開かない。
-                if (version != 3)
-                    return null;
-
-                Dictionary<Hex2, FieldView.Grid> retDict = new Dictionary<Hex2, FieldView.Grid>();
-
-                maxXZ = br.ReadInt32();
-                int maxY = br.ReadInt32();
-
-                for (int cx = 0; cx < maxXZ; cx++)
+                // 始点位置に戻す
+                mem.Position = 0;
+                using (System.IO.BinaryReader br = new System.IO.BinaryReader(mem))
                 {
-                    for (int cz = 0; cz < maxXZ; cz++)
+                    ushort version = br.ReadUInt16();
+
+                    // バージョン３以外は開かない。
+                    if (version != 3)
+                        return null;
+
+                    Dictionary<Hex2, FieldView.Grid> retDict = new Dictionary<Hex2, FieldView.Grid>();
+
+                    maxXZ = br.ReadInt32();
+                    int maxY = br.ReadInt32();
+
+                    for (int cx = 0; cx < maxXZ; cx++)
                     {
-                        int r = maxXZ / 2 - cz;
-                        int q = cx - (maxXZ + r) / 2;
-
-                        // 進入不可位置のリスト
-                        HashSet<int> noEntries = new HashSet<int>();
-
-                        // グリッドの生成
-                        FieldView.Grid grid = new FieldView.Grid();
-
-                        // タイルの読み込み
-                        for (int cy = 0; cy < maxY; cy++)
+                        for (int cz = 0; cz < maxXZ; cz++)
                         {
-                            int kindInt = br.ReadInt32();
-                            int flagInt = br.ReadInt32();
+                            int r = maxXZ / 2 - cz;
+                            int q = cx - (maxXZ + r) / 2;
 
-                            // 変換してタイルの種類を取得
-                            if (TileKindConvertDictionary.TryGetValue(kindInt, out FieldView.Tile.TileKind kind) == false)
+                            // 進入不可位置のリスト
+                            HashSet<int> noEntries = new HashSet<int>();
+
+                            // グリッドの生成
+                            FieldView.Grid grid = new FieldView.Grid();
+
+                            // タイルの読み込み
+                            for (int cy = 0; cy < maxY; cy++)
                             {
-                                // 変換できない値だった場合は無しとする
-                                kind = FieldView.Tile.TileKind.無し;                               
-                                UnityEngine.Debug.LogWarning($"Unknown tile kind: {kindInt} at position ({q}, {r}, {cy})");
-                            }
+                                int kindInt = br.ReadInt32();
+                                int flagInt = br.ReadInt32();
 
-                            // タイルの生成
-                            grid.Tiles[cy] = new FieldView.Tile() { Kind = kind };
-
-                            // 進入不可を記録
-                            if ((flagInt & 0x01) != 0)
-                            {
-                                noEntries.Add(cy);
-                            }
-                        }
-
-                        // StandPointの生成
-                        grid.CreateStandPoint();
-
-                        // 進入不可の反映
-                        if (grid.StandPoints != null)
-                        {
-                            foreach (var standPoint in grid.StandPoints)
-                            {
-                                if (noEntries.Contains(standPoint.Height))
+                                // 変換してタイルの種類を取得
+                                if (TileKindConvertDictionary.TryGetValue(kindInt, out FieldView.Tile.TileKind kind) == false)
                                 {
-                                    standPoint.IsEnterable = false;
+                                    // 変換できない値だった場合は無しとする
+                                    kind = FieldView.Tile.TileKind.無し;
+                                    UnityEngine.Debug.LogWarning($"Unknown tile kind: {kindInt} at position ({q}, {r}, {cy})");
+                                }
+
+                                // タイルの生成
+                                grid.Tiles[cy] = new FieldView.Tile() { Kind = kind };
+
+                                // 進入不可を記録
+                                if ((flagInt & 0x01) != 0)
+                                {
+                                    noEntries.Add(cy);
                                 }
                             }
+
+                            // StandPointの生成
+                            grid.CreateStandPoint();
+
+                            // 進入不可の反映
+                            if (grid.StandPoints != null)
+                            {
+                                foreach (var standPoint in grid.StandPoints)
+                                {
+                                    if (noEntries.Contains(standPoint.Height))
+                                    {
+                                        standPoint.IsEnterable = false;
+                                    }
+                                }
+                            }
+
+                            // 位置情報をキーにして、グリッドを保存
+                            retDict.Add(new Hex2(q, r), grid);
                         }
-
-                        // 位置情報をキーにして、グリッドを保存
-                        retDict.Add(new Hex2(q, r), grid);
                     }
-                }
 
-                return retDict;
+                    return retDict;
+                }
             }
+        }
+        catch (System.Exception ex)
+        {
+            UnityEngine.Debug.LogError($"Failed to load map data from {fileName}: {ex}");
+            return null;
         }
     }
 
