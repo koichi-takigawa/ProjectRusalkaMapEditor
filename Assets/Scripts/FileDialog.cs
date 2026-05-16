@@ -50,10 +50,11 @@ public static class Dialog
     // アイコンの種類を表す定数
     public enum MessageBoxIcon : uint
     {
-        None     = 0x00000000,
-        Error    = 0x00000010,
-        Warning  = 0x00000020,
-        Question = 0x00000030
+        None        = 0x00000000,
+        Error       = 0x00000010,
+        Warning     = 0x00000020,
+        Question    = 0x00000030,
+        Information = 0x00000040
     }
 
     // 戻り値の定数

@@ -4,32 +4,33 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+#nullable enable
 
 internal class Main : MonoBehaviour
 {
     /// <summary>新規作成ボタン</summary>
-    [SerializeField] Button ButtonNewMap;
+    [SerializeField] Button ButtonNewMap = default!;
 
     /// <summary>読み込みボタン</summary>
-    [SerializeField] Button ButtonLoad;
+    [SerializeField] Button ButtonLoad = default!;
 
     /// <summary>上書きボタン</summary>
-    [SerializeField] Button ButtonSave;
+    [SerializeField] Button ButtonSave = default!;
 
     /// <summary>名前をつけて保存ボタン</summary>
-    [SerializeField] Button ButtonSaveWithNamed;
+    [SerializeField] Button ButtonSaveWithNamed = default!;
 
     /// <summary>マテリアル</summary>
-    [SerializeField] Material[] Materials;
+    [SerializeField] Material[] Materials = default!;
 
     /// <summary>マップデータのルート</summary>
-    [SerializeField] Transform MapRoot;
+    [SerializeField] Transform MapRoot = default!;
 
     /// <summary>MapのGameObject</summary>
     private Dictionary<(int q, int r), GameObject> EdittingGameObjects = new Dictionary<(int q, int r), GameObject>();
 
     /// <summary>編集中のMapFile名</summary>
-    [System.NonSerialized] public static string EdittingMapFilePath = null;
+    [System.NonSerialized] public static string? EdittingMapFilePath = null;
 
     /// <summary>FieldView</summary>
     [System.NonSerialized] public static FieldView EdittingFieldView = new FieldView();
@@ -130,14 +131,11 @@ internal class Main : MonoBehaviour
             // キャンセルされた場合は、ファイルを開く処理を中止する
             if (dialogResult != Dialog.MessageBoxResult.IDOK)
                 return;
-
-            // 変更を破棄してファイルを開く
-            Debug.Log("Discarding changes and opening a map...");
         }
 
         OpenFileName ofn = new OpenFileName();
         ofn.title = "マップデータを開く";
-        ofn.filter = "Map Files (*.map)\0*.map\0All Files (*.*)\0*.*\0\0";
+        ofn.filter = "マップファイル(*.jmap3, *.jmap4)\0*.jmap3;*.jmap4\0すべてのファイル(*.*)\0*.*\0\0";
 
         // フラグ設定
         // 0x00080000: OFN_EXPLORER (新しいスタイルのダイアログを使用)
@@ -156,7 +154,60 @@ internal class Main : MonoBehaviour
         }
 
         // 選択されたファイルパスを取得
-        EdittingMapFilePath = ofn.file;
+        var path = Path.GetFullPath(ofn.file.Trim());
+        FieldView? fieldView = null;
+
+        switch (System.IO.Path.GetExtension(path).ToLower())
+        {
+            case ".jmap3":
+
+                fieldView = JMap3.Load(path);
+                break;
+
+            case ".jmap4":
+
+                fieldView = JMap4.Load(path);
+                break;
+
+            default:
+                Dialog.ShowMessageBox(
+                    "サポートされていないファイル形式です。",
+                    "メッセージ",
+                    Dialog.MessageBoxButtons.OK,
+                    Dialog.MessageBoxIcon.Information
+                );
+                return;
+        }
+
+        // ファイルの読み込みに失敗した場合はエラーメッセージを表示して処理を中止する
+        if (fieldView == null)
+        {
+            Dialog.ShowMessageBox(
+                   "ファイルの読み込みに失敗しました。",
+                   "エラー",
+                   Dialog.MessageBoxButtons.OK,
+                   Dialog.MessageBoxIcon.Error
+               );
+            return;
+        }
+
+        // 読み込んだフィールドビューを編集中のフィールドビューに設定
+        EdittingFieldView = fieldView;
+
+        // 既存のマップオブジェクトを削除
+        if (EdittingGameObjects != null)
+        {
+            foreach (var go in EdittingGameObjects.Values)
+            {
+                Destroy(go);
+            }
+        }
+
+        // マップを表示
+        EdittingGameObjects = MapCreator.CreateMesh(EdittingFieldView, MapRoot, Materials);
+
+        // 編集中のファイルパスを設定
+        EdittingMapFilePath = path;
 
         // 変更なしにする
         HasChanges = false;

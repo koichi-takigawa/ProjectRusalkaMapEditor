@@ -13,6 +13,29 @@ namespace JL.Tactics
         // √3
         public const float SQRT_3 = 1.7320508f;
 
+        [Flags]
+        public enum TileKind : int
+        {
+            無し = 0,
+            水路 = 1 << 00,
+            湿地 = 1 << 01,
+            土肌 = 1 << 08,
+            草   = 1 << 09,
+            砂利 = 1 << 10,
+            岩場 = 1 << 11,
+            煉瓦 = 1 << 12,
+            木床 = 1 << 13,
+            砂地 = 1 << 14,
+            雪   = 1 << 15,
+            屋根 = 1 << 16,
+            溶岩 = 1 << 17,
+            塩   = 1 << 18,
+            氷   = 1 << 19,
+            煙突 = 1 << 20,
+
+            水系 = 0x000000ff,
+            陸系 = 0x0fffff00,
+        }
 
         public class StandPoint
         {
@@ -32,6 +55,11 @@ namespace JL.Tactics
             public int WaterDepth { get; set; }
 
             /// <summary>
+            /// タイル種別。水系の場合は表面の種別、陸系の場合は地面の種別。
+            /// </summary>
+            public TileKind Kind { get; set; }
+
+            /// <summary>
             /// 進入可否(true:進入可能, false:進入不可)
             /// </summary>
             public bool IsEnterable { get; set; }
@@ -41,15 +69,13 @@ namespace JL.Tactics
             /// <summary>
             /// コンストラクタ
             /// </summary>
-            public StandPoint(int height, int upperSpace, int waterDepth, UInt32 kind, bool isEnterable)
+            public StandPoint(int height, int upperSpace, int waterDepth, TileKind kind, bool isEnterable)
             {
                 Height = height;
                 UpperSpace = upperSpace;
                 WaterDepth = waterDepth;
+                Kind = kind;
                 IsEnterable = isEnterable;
-
-                // kind(地点種別は今後用)
-                _ = kind;
             }
         }
 
@@ -170,11 +196,11 @@ namespace JL.Tactics
 
                                         // 格納用の変数に変換
                                         Hex2 hex = new Hex2(q, r);
-                                        UInt32 kind = kindByte < 32 ? (UInt32)(1 << kindByte) : 0;
+                                        uint kind = kindByte < 32 ? (uint)(1u << kindByte) : 0;
                                         bool isEnterable = (flags & 0x1) != 0;
 
                                         // StandPoint生成
-                                        StandPoint standPoint = new StandPoint(height, space, 0, kind, isEnterable);
+                                        StandPoint standPoint = new StandPoint(height, space, 0, (TileKind)kind, isEnterable);
 
                                         // すでにある場合
                                         if (grids.ContainsKey(hex))
