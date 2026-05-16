@@ -159,6 +159,12 @@ public class MapCreator
     /// <summary>UVのひとつのサイズ定数Y</summary>
     static readonly float UV_SIZE_Y = 20f / 64f;
 
+    // 8x8の区画ごとにグリッドを分割するための関数
+    private static int CalcSection(int qr)
+    {
+        return qr & ~0b111;
+    }
+
     // フィールド全体のメッシュを生成する
     internal static Dictionary<(int q, int r), GameObject> CreateMesh(FieldView field, Transform root, Material[] materials)
     {
@@ -169,8 +175,8 @@ public class MapCreator
         foreach (var grid in field.Grids)
         {
             // グリッドのQ,Rを8で割って、どの区画に属するかを計算
-            int q = (int)System.Math.Floor(grid.Key.q / 8.0) * 8;
-            int r = (int)System.Math.Floor(grid.Key.r / 8.0) * 8;
+            int q = CalcSection(grid.Key.q);
+            int r = CalcSection(grid.Key.r);
 
             // すでにこの区画が生成されているかを確認
             if (result.ContainsKey((q, r)))
@@ -178,15 +184,18 @@ public class MapCreator
                 continue;
             }
 
+            // 対象の区画に属するグリッドを取得する
+            var targetGrids = field.Grids.Where(a => q == CalcSection(a.Key.q) && r == CalcSection(a.Key.r)).ToArray();
+
             // 親要素となるGameObjectを作成
             GameObject gameObject = new GameObject($"GeneratedMeshObject_{q}_{r}");
             gameObject.transform.parent = root;
 
             // 該当区画のメッシュを生成
-            CreateMeshPart(field, gameObject, q, r, materials);
+            CreateMeshPart(field, targetGrids, gameObject, q, r, materials);
 
             // コライダの生成
-            CreateColliderPart(field, gameObject, q, r);
+            CreateColliderPart(field, targetGrids, gameObject, q, r);
 
             // 生成済み区画の登録
             result.Add((q, r), gameObject);
@@ -202,8 +211,8 @@ public class MapCreator
         for (int i = 0; i < DIRECTIONS_FOR_MARK.Length; i++)
         {
             // グリッドのQ,Rを8で割って、どの区画に属するかを計算
-            int q = (int)System.Math.Floor((baseQ + DIRECTIONS_FOR_MARK[i].Q) / 8.0) * 8;
-            int r = (int)System.Math.Floor((baseR + DIRECTIONS_FOR_MARK[i].R) / 8.0) * 8;
+            int q = CalcSection(baseQ + DIRECTIONS_FOR_MARK[i].Q);
+            int r = CalcSection(baseR + DIRECTIONS_FOR_MARK[i].R);
 
             // すでに記録されている場合はスキップ
             if (affectedPositions.Contains((q, r)))
@@ -228,15 +237,24 @@ public class MapCreator
                 meshes.Remove((pos.q, pos.r));
             }
 
+            // 対象の区画に属するグリッドを取得する
+            var targetGrids = field.Grids.Where(a => pos.q == CalcSection(a.Key.q) && pos.r == CalcSection(a.Key.r)).ToArray();
+
+            // 対象の区画にグリッドがない場合はスキップ
+            if (targetGrids == null || targetGrids.Length == 0)
+            {
+                continue;
+            }
+
             // 親要素となるGameObjectを作成
             GameObject gameObject = new GameObject($"GeneratedMeshObject_{pos.q}_{pos.r}");
             gameObject.transform.parent = root;
 
             // 該当区画のメッシュを生成
-            CreateMeshPart(field, gameObject, pos.q, pos.r, materials);
+            CreateMeshPart(field, targetGrids, gameObject, pos.q, pos.r, materials);
 
             // コライダの生成
-            CreateColliderPart(field, gameObject, pos.q, pos.r);
+            CreateColliderPart(field, targetGrids, gameObject, pos.q, pos.r);
 
             // 生成済み区画の登録
             meshes.Add((pos.q, pos.r), gameObject);
@@ -244,7 +262,7 @@ public class MapCreator
     }
 
     // 8x8の区画ごとにメッシュを生成する
-    internal static void CreateMeshPart(FieldView field, GameObject gameObject, int baseQ, int baseR, Material[] materials)
+    internal static void CreateMeshPart(FieldView field, KeyValuePair<(int q, int r), FieldView.Grid>[] grids, GameObject gameObject, int baseQ, int baseR, Material[] materials)
     {
         // マテリアルがない場合はスキップ
         if (materials == null || materials.Length == 0)
@@ -258,9 +276,7 @@ public class MapCreator
         // UV座標リスト
         List<Vector2> listUVs = new List<Vector2>();
 
-        foreach (var grid in field.Grids
-            .Where(a => baseQ <= a.Key.q && a.Key.q < baseQ + 8 && 
-                        baseR <= a.Key.r && a.Key.r < baseR + 8))
+        foreach (var grid in grids)
         {
             // テクスチャレベル（０：天板）
             int level = 0;
@@ -373,13 +389,12 @@ public class MapCreator
         meshRenderer.material = materials[0];
     }
 
-    internal static void CreateColliderPart(FieldView field, GameObject gameObject, int baseQ, int baseR)
+    internal static void CreateColliderPart(FieldView field, KeyValuePair<(int q, int r), FieldView.Grid>[] grids, GameObject gameObject, int baseQ, int baseR)
     {
         // コライダ用の頂点リスト
         List<Vector3> listVertices = new List<Vector3>();
 
-        foreach (var grid in field.Grids.Where(a => baseQ <= a.Key.q && a.Key.q < baseQ + 8 &&
-                                                    baseR <= a.Key.r && a.Key.r < baseR + 8))
+        foreach (var grid in grids)
         {
             // 必要なデータを探して登録
             for (int i = 0; i < (int)DIRECTIONS.Length; i++)
