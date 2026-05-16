@@ -9,22 +9,22 @@ using UnityEngine.UI;
 internal class Main : MonoBehaviour
 {
     /// <summary>新規作成ボタン</summary>
-    [SerializeField] Button ButtonNewMap;
+    [SerializeField] Button ButtonNewMap = default!;
 
     /// <summary>読み込みボタン</summary>
-    [SerializeField] Button ButtonLoad;
+    [SerializeField] Button ButtonLoad = default!;
 
     /// <summary>上書きボタン</summary>
-    [SerializeField] Button ButtonSave;
+    [SerializeField] Button ButtonSave = default!;
 
     /// <summary>名前をつけて保存ボタン</summary>
-    [SerializeField] Button ButtonSaveWithNamed;
+    [SerializeField] Button ButtonSaveWithNamed = default!;
 
     /// <summary>マテリアル</summary>
-    [SerializeField] Material[] Materials;
+    [SerializeField] Material[] Materials = default!;
 
     /// <summary>マップデータのルート</summary>
-    [SerializeField] Transform MapRoot;
+    [SerializeField] Transform MapRoot = default!;
 
     /// <summary>MapのGameObject</summary>
     private Dictionary<(int q, int r), GameObject> EdittingGameObjects = new Dictionary<(int q, int r), GameObject>();
