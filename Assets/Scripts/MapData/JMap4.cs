@@ -84,8 +84,8 @@ public class JMap4
                     Tiles = pair.Element("Value")?.Element("Tiles")?.Elements("Tile")
                         .Select(t => new
                         {
-                            Kind = (string)t.Attribute("Kind"),
-                            NoEntry = (bool)t.Attribute("NoEntry")
+                            Kind = (string?)t.Attribute("Kind") ?? "無し",
+                            NoEntry = (bool?)t.Attribute("NoEntry") ?? false
                         })
                         .ToList()
                 })
