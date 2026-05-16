@@ -1,5 +1,4 @@
 ﻿using JL.Tactics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
@@ -61,7 +60,7 @@ public class JMap4
     /// </summary>
     /// <param name="fileName">対象ファイル名</param>
     /// <returns>FieldView</returns>
-    internal static FieldView Load(string path)
+    internal static FieldView? Load(string path)
     {
         // FieldViewのインスタンスを作成
         FieldView fieldView = new FieldView();
@@ -206,6 +205,7 @@ public class JMap4
         {
             // エラー処理
             Debug.LogError($"Error loading map data: {ex.Message}");
+            return null;
         }
 
         return fieldView;
