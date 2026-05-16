@@ -278,6 +278,12 @@ internal class Main : MonoBehaviour
             {
                 grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.無し;
 
+                // データがなくなったら排除する。
+                if (grid.HasData == false)
+                {
+                    EdittingFieldView.Grids.Remove((pos.Q, pos.R));
+                }
+
                 HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
                 MapCreator.Mark(affectedPositions, pos.Q, pos.R);
 

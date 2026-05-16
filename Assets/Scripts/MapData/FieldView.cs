@@ -1,6 +1,7 @@
 ﻿using JL.Tactics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 #nullable enable
 
 internal class FieldView
@@ -64,11 +65,10 @@ internal class FieldView
                 Tiles[i] = new Tile();
         }
 
-        /// <summary>StandPointの更新</summary>
-        public void CreateStandPoint()
+        /// <summary>何らかのデータがあるか(true:あり, false:なし)。タイルの種類が無し以外のものがある場合はデータがあるとみなす。</summary>
+        public bool HasData
         {
-            // StandPointの生成
-
+            get => Tiles.Any(tile => tile.Kind != Tile.TileKind.無し);
         }
     }
 

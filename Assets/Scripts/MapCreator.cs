@@ -23,6 +23,20 @@ public class MapCreator
         new Hex3Offset(+0, -1, +0),     // 11時方向
     };
 
+    /// <summary>
+    /// MARK用のQ,Rオフセット
+    /// </summary>
+    static readonly Hex2Offset[] DIRECTIONS_FOR_MARK = new Hex2Offset[7]
+    {
+        new Hex2Offset(+0, +0),         // 現在地
+        new Hex2Offset(+1, -1),         // １時方向
+        new Hex2Offset(+1, +0),         // ３時方向
+        new Hex2Offset(+0, +1),         // ５時方向
+        new Hex2Offset(-1, +1),         // ７時方向
+        new Hex2Offset(-1, +0),         // ９時方向
+        new Hex2Offset(+0, -1),         // 11時方向
+    };
+
     // 以下のように六角形の頂点位置を定義する。Z+2が天板の上側、Z-2が天板の下側となる。
     // これにSIZE_X,Y,Zを掛けることでUnity座標系へ変換される
     // 
@@ -184,11 +198,12 @@ public class MapCreator
     // 1マスの内容が変更されたときに、そのマスを含む区画を更新する必要があることを記録する
     internal static void Mark(HashSet<(int q, int r)> affectedPositions, int baseQ, int baseR)
     {
-        for (int i = 0; i < DIRECTIONS.Length; i++)
+        // 変更されたマスを含む区画と、その周囲の区画が影響を受けうるため、周囲も含めて記録する
+        for (int i = 0; i < DIRECTIONS_FOR_MARK.Length; i++)
         {
             // グリッドのQ,Rを8で割って、どの区画に属するかを計算
-            int q = (int)System.Math.Floor((baseQ + DIRECTIONS[i].Q) / 8.0) * 8;
-            int r = (int)System.Math.Floor((baseR + DIRECTIONS[i].R) / 8.0) * 8;
+            int q = (int)System.Math.Floor((baseQ + DIRECTIONS_FOR_MARK[i].Q) / 8.0) * 8;
+            int r = (int)System.Math.Floor((baseR + DIRECTIONS_FOR_MARK[i].R) / 8.0) * 8;
 
             // すでに記録されている場合はスキップ
             if (affectedPositions.Contains((q, r)))
