@@ -1,6 +1,5 @@
 ﻿using JL.Tactics;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 internal class JMap3
 {
@@ -134,8 +133,8 @@ internal class JMap3
                             if (TileKindConvertDictionary.TryGetValue(kindInt, out FieldView.Tile.TileKind kind) == false)
                             {
                                 // 変換できない値だった場合は無しとする
-                                kind = FieldView.Tile.TileKind.無し;
-                                Debug.WriteLine($"Unknown tile kind: {kindInt} at position ({q}, {r}, {cy})");
+                                kind = FieldView.Tile.TileKind.無し;                               
+                                UnityEngine.Debug.LogWarning($"Unknown tile kind: {kindInt} at position ({q}, {r}, {cy})");
                             }
 
                             // タイルの生成
