@@ -135,7 +135,7 @@ internal class Main : MonoBehaviour
 
         OpenFileName ofn = new OpenFileName();
         ofn.title = "マップデータを開く";
-        ofn.filter = "マップファイル(*.jmap3, *.jmap4, *.jmap5)\0*.jmap3;*.jmap4;*.jmap5\0すべてのファイル(*.*)\0*.*\0\0";
+        ofn.filter = "マップファイル(*.jmap3, *.jmap4)\0*.jmap3;*.jmap4\0すべてのファイル(*.*)\0*.*\0\0";
 
         // フラグ設定
         // 0x00080000: OFN_EXPLORER (新しいスタイルのダイアログを使用)
@@ -167,10 +167,6 @@ internal class Main : MonoBehaviour
             case ".jmap4":
 
                 fieldView = JMap4.Load(path);
-                break;
-
-            case ".jmap5":
-                
                 break;
 
             default:
