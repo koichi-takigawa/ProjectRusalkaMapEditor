@@ -204,24 +204,31 @@ public class MapCreator
         return result;
     }
 
-    // 1マスの内容が変更されたときに、そのマスを含む区画を更新する必要があることを記録する
+    // 1マスの内容が変更されたときに、そのマスを記録する
     internal static void Mark(HashSet<(int q, int r)> affectedPositions, int baseQ, int baseR)
+    {
+        // グリッドのQ,Rを8で割って、どの区画に属するかを計算
+        int q = CalcSection(baseQ);
+        int r = CalcSection(baseR);
+
+        // すでに記録されている場合はスキップ
+        if (affectedPositions.Contains((q, r)))
+        {
+            return;
+        }
+
+        // 記録
+        affectedPositions.Add((q, r));
+    }
+
+    // 1マスの内容が変更されたときに、そのマスを含む区画を更新する必要があることを記録する
+    internal static void MarkAround(HashSet<(int q, int r)> affectedPositions, int baseQ, int baseR)
     {
         // 変更されたマスを含む区画と、その周囲の区画が影響を受けうるため、周囲も含めて記録する
         for (int i = 0; i < DIRECTIONS_FOR_MARK.Length; i++)
         {
-            // グリッドのQ,Rを8で割って、どの区画に属するかを計算
-            int q = CalcSection(baseQ + DIRECTIONS_FOR_MARK[i].Q);
-            int r = CalcSection(baseR + DIRECTIONS_FOR_MARK[i].R);
-
-            // すでに記録されている場合はスキップ
-            if (affectedPositions.Contains((q, r)))
-            {
-                continue;
-            }
-
             // 記録
-            affectedPositions.Add((q, r));
+            Mark(affectedPositions, baseQ + DIRECTIONS_FOR_MARK[i].Q, baseR + DIRECTIONS_FOR_MARK[i].R);
         }
     }
 
