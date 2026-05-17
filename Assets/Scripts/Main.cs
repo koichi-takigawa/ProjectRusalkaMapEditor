@@ -40,7 +40,7 @@ internal class Main : MonoBehaviour
     [System.NonSerialized] public static FieldView EdittingFieldView = new FieldView();
 
     /// <summary>現在選択中のツール</summary>
-    ToolItem.ToolKind CurrentPen
+    ToolItem.ToolKind CurrentTool
     {
         get
         {
@@ -290,7 +290,7 @@ internal class Main : MonoBehaviour
             // 有効なボタンと位置が提供されていることを確認
             if (button != null && fromPos != null && toPos != null)
             {
-                switch (CurrentPen)
+                switch (CurrentTool)
                 {
                     case ToolItem.ToolKind.Pen:
 
