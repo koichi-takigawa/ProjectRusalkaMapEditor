@@ -386,7 +386,7 @@ internal class Main : MonoBehaviour
     {
         // 編集中フィールドから対象のグリッドを取得し、指定された位置にブロックが存在する場合は削除する
         if (EdittingFieldView.Grids.TryGetValue((pos.Q, pos.R), out FieldView.Grid grid) == false ||
-            pos.H < 0 && FieldView.Grid.MAX_H <= pos.H)
+            pos.H < 0 || FieldView.Grid.MAX_H <= pos.H)
         {
             return false;
         }
