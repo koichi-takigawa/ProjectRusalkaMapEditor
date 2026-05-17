@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 #nullable enable
@@ -26,6 +27,9 @@ internal class Main : MonoBehaviour
     /// <summary>マップデータのルート</summary>
     [SerializeField] Transform MapRoot = default!;
 
+    /// <summary>ツールのトグルグループ</summary>
+    [SerializeField] ToggleGroup ToolToggleGroup = default!;
+
     /// <summary>MapのGameObject</summary>
     private Dictionary<(int q, int r), GameObject> EdittingGameObjects = new Dictionary<(int q, int r), GameObject>();
 
@@ -34,6 +38,16 @@ internal class Main : MonoBehaviour
 
     /// <summary>FieldView</summary>
     [System.NonSerialized] public static FieldView EdittingFieldView = new FieldView();
+
+    /// <summary>現在選択中のツール</summary>
+    ToolItem.ToolKind CurrentTool
+    {
+        get
+        {
+            var activeToggle = ToolToggleGroup?.ActiveToggles()?.FirstOrDefault();
+            return activeToggle?.GetComponent<ToolItem>()?.Tool ?? ToolItem.ToolKind.Pen;
+        }
+    }
 
     /// <summary>
     /// 変更有無(true:変更あり、false:変更なし)。変更がある場合は、マップを閉じる前に保存するか確認する。
@@ -75,6 +89,8 @@ internal class Main : MonoBehaviour
 
         Debug.Assert(Materials != null && Materials.Length > 0, $"{this.name}.Materials is null or empty.");
         Debug.Assert(MapRoot != null, $"{this.name}.MapRoot is null.");
+
+        Debug.Assert(ToolToggleGroup != null, $"{this.name}.ToolToggleGroup is null.");
     }
 
     /// <summary>
@@ -274,17 +290,34 @@ internal class Main : MonoBehaviour
             // 有効なボタンと位置が提供されていることを確認
             if (button != null && fromPos != null && toPos != null)
             {
-                // ブロック消去
-                switch (button)
+                switch (CurrentTool)
                 {
-                    case FieldInputController.Button.Left:
-                        // 左クリックでブロックを追加
-                        HasChanges |= AddBlock(toPos);
+                    case ToolItem.ToolKind.Pen:
+
+                        // ペンツールが選択されている場合は、クリックイベントに応じてブロックの追加/削除を行う
+                        switch (button)
+                        {
+                            case FieldInputController.Button.Left:
+                                // 左クリックでブロックを追加
+                                HasChanges |= AddBlock(toPos);
+                                break;
+                            case FieldInputController.Button.Right:
+                                // 右クリックでブロックを削除
+                                HasChanges |= RemoveBlock(fromPos);
+                                break;
+                        }
                         break;
-                    case FieldInputController.Button.Right:
-                        // 右クリックでブロックを削除
-                        HasChanges |= RemoveBlock(fromPos);
+
+                    case ToolItem.ToolKind.Paint:
+
+                        // ペイントツールが選択されている場合はペイント
+                        HasChanges |= PaintBlocks(fromPos);
                         break;
+
+                    default:
+
+                        // その他のツールが選択されている場合は、クリックイベントを無視する
+                        return;
                 }
             }
         };
@@ -308,7 +341,7 @@ internal class Main : MonoBehaviour
             grid.Tiles[pos.H].Kind = FieldView.Tile.TileKind.草;
 
             HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
-            MapCreator.Mark(affectedPositions, pos.Q, pos.R);
+            MapCreator.MarkAround(affectedPositions, pos.Q, pos.R);
 
             // 更新
             MapCreator.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
@@ -336,7 +369,7 @@ internal class Main : MonoBehaviour
                 }
 
                 HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
-                MapCreator.Mark(affectedPositions, pos.Q, pos.R);
+                MapCreator.MarkAround(affectedPositions, pos.Q, pos.R);
 
                 // 更新
                 MapCreator.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
@@ -348,9 +381,54 @@ internal class Main : MonoBehaviour
         return false;
     }
 
-    // Update is called once per frame
-    void Update()
+    // 塗りつぶし
+    private bool PaintBlocks(Hex3 pos)
     {
-        
+        // 編集中フィールドから対象のグリッドを取得し、指定された位置が塗りつぶし可能な範囲内か確認する
+        if (EdittingFieldView.Grids.TryGetValue((pos.Q, pos.R), out FieldView.Grid grid) == false ||
+            pos.H < 0 || FieldView.Grid.MAX_H <= pos.H)
+        {
+            return false;
+        }
+
+        // その場所に何もない場合は塗りつぶしできない
+        if (grid.Tiles[pos.H].Kind == FieldView.Tile.TileKind.無し)
+        {
+            return false;
+        }
+
+        // 塗りつぶしの対象の色を取得
+        var targetKind = grid.Tiles[pos.H].Kind;
+
+        // 上下に空白でないタイルが続く範囲を取得
+        int minH = pos.H;
+        int maxH = pos.H;
+
+        // 上方向の範囲を取得（境界チェックを条件式に含める）
+        while (maxH + 1 < FieldView.Grid.MAX_H && grid.Tiles[maxH + 1].Kind == targetKind)
+        {
+            maxH++;
+        }
+
+        // 下方向の範囲を取得
+        while (minH - 1 >= 0 && grid.Tiles[minH - 1].Kind == targetKind)
+        {
+            minH--;
+        }
+
+        // 範囲内のタイルを塗りつぶし
+        for (int h = minH; h <= maxH; h++)
+        {
+            grid.Tiles[h].Kind = FieldView.Tile.TileKind.草;
+        }
+
+        // ブロックは増減しないので、現在のグリッドのみを更新する。
+        HashSet<(int q, int r)> affectedPositions = new HashSet<(int q, int r)>();
+        MapCreator.Mark(affectedPositions, pos.Q, pos.R);
+
+        // 更新
+        MapCreator.Update(EdittingFieldView, MapRoot, Materials, EdittingGameObjects, affectedPositions);
+
+        return true;
     }
 }
