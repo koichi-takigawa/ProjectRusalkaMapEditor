@@ -42,7 +42,11 @@ internal class Main : MonoBehaviour
     /// <summary>現在選択中のツール</summary>
     ToolItem.ToolKind CurrentPen
     {
-        get => ToolToggleGroup?.ActiveToggles()?.First()?.GetComponent<ToolItem>()?.Tool ?? ToolItem.ToolKind.Pen;
+        get
+        {
+            var activeToggle = ToolToggleGroup?.ActiveToggles()?.FirstOrDefault();
+            return activeToggle?.GetComponent<ToolItem>()?.Tool ?? ToolItem.ToolKind.Pen;
+        }
     }
 
     /// <summary>
