@@ -10,5 +10,7 @@ public class ToolItem : MonoBehaviour
     }
 
     // ツール
-    [SerializeField] public ToolKind Tool;
+    [SerializeField] private ToolKind tool;
+
+    public ToolKind Tool => tool;
 }
