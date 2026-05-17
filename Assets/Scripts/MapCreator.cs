@@ -204,7 +204,7 @@ public class MapCreator
         return result;
     }
 
-    // 1マスの内容が変更されたときに、そのマスを記録する
+    // 1マスの内容が変更されたときに、そのマスが含まれる区画を記録する
     internal static void Mark(HashSet<(int q, int r)> affectedPositions, int baseQ, int baseR)
     {
         // グリッドのQ,Rを8で割って、どの区画に属するかを計算
@@ -221,7 +221,7 @@ public class MapCreator
         affectedPositions.Add((q, r));
     }
 
-    // 1マスの内容が変更されたときに、そのマスを含む区画を更新する必要があることを記録する
+    // 1マスの内容が変更されたときに、そのマスとその周囲のマスが含まれる区画を記録する
     internal static void MarkAround(HashSet<(int q, int r)> affectedPositions, int baseQ, int baseR)
     {
         // 変更されたマスを含む区画と、その周囲の区画が影響を受けうるため、周囲も含めて記録する
